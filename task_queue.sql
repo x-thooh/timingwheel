@@ -1,0 +1,23 @@
+CREATE TABLE task_queue (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    task_no BIGINT UNSIGNED NOT NULL COMMENT '任务唯一编号，雪花算法生成，业务唯一标识',
+    payload JSON NULL COMMENT '任务数据-{"callback":"xxx", "data":{}}',
+    delay_time INT NOT NULL DEFAULT 0 COMMENT '延迟秒数，>0表示延迟任务',
+    timeout INT NOT NULL DEFAULT 60 COMMENT '任务超时时间(秒)',
+    backoff JSON NULL COMMENT '失败重试间隔数组,单位秒，例如 [5,15,60]',
+    cron_expr VARCHAR(100) NULL COMMENT 'Cron 表达式，NULL表示一次性任务',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0待执行 1执行中 2成功 3失败',
+    next_run_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '下次执行时间',
+    run_timeout_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '执行超时时间:下次执行时间+超时时间',
+    fail_count INT NOT NULL DEFAULT 0 COMMENT '当前失败次数',
+    fail_msgs JSON NULL COMMENT '失败信息数组',
+    last_retry_at DATETIME(6) NULL COMMENT '最后一次重试时间',
+    locked_by TINYINT NOT NULL DEFAULT 0 COMMENT '锁定程序序号',
+    extra JSON NULL COMMENT '额外信息',
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY udx_task_no(task_no),
+    KEY idx_status_next_run_locked_by (`status`, next_run_at, locked_by),
+    KEY idx_status_timeout_at (`status`, run_timeout_at, locked_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

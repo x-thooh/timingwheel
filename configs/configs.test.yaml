@@ -1,0 +1,62 @@
+http:
+  host: "0.0.0.0"
+  port: 8081
+  ghost: "127.0.0.1"
+  gport: 50051
+
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+
+logger:
+  model: file                # file, std, file,std
+  level: debug               # debug, info, warn, error
+  format: text               # json or text
+  file: /app/logs/default.log         # 文件路径（自动创建）
+  max_size_mb: 50            # 单文件最大 MB
+  max_backups: 5             # 保留多少历史文件
+  max_age_days: 7            # 日志保留天数
+  compress: true             # 是否压缩旧日志
+
+database:
+  driver: "mysql"
+  host: "47.97.27.195"
+  port: 3306
+  user: "root"
+  password: "lansexiongdi6,"
+  name: "transfer"
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_lifetime: "1h"
+  conn_max_idle_time: "10m"
+
+timingwheel:
+  # 间隔
+  tick: "1s"
+  # 轮数
+  wheel_size: 60
+  # 协程数量
+  pool_size: 1000
+
+  # 编号
+  node: 0
+  name_space: "default"
+  sts_name: "delay"
+
+  # 每次获取待处理数量
+  pending_limit: 100
+  # 待处理处理时间周期
+  pending_interval: "3s"
+  # 待处理提前加入时间轮时间
+  advance_pending_time: "10s"
+
+  # 每次获取超时数量
+  timeout_limit: 100
+  # 超时处理时间周期
+  timeout_interval: "10s"
+
+  # 节点处理时间周期
+  node_interval: "10s"
+
+  # 快速路径时间，需要大于【待处理提前加入时间轮时间】
+  fast_path_time: "15s"

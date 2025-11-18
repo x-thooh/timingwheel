@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package validate_ext;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/x-thooh/delay/api/proto/validate;validate";
+
+extend google.protobuf.FieldOptions {
+  string custom_error = 50001;
+}

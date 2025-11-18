@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "github.com/x-thooh/delay";
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+
+service Example {
+  rpc Valid (google.protobuf.Struct) returns (google.protobuf.Value) {
+    option (google.api.http) = {
+      post: "/example/valid"
+      body: "*"
+    };
+  }
+}

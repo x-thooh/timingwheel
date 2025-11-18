@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package delay;
+
+option go_package = "github.com/x-thooh/delay";
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+import "validate/validate.proto";
+import "validate/validate_ext.proto";
+
+service Delay {
+  rpc Register (RegisterRequest) returns (RegisterReply) {
+    option (google.api.http) = {
+      post: "/delay/register"
+      body: "*"
+    };
+  }
+}
+
+message RegisterRequest {
+  string schema = 1 [(validate.rules).string = {in: ["FMT", "HTTP", "HTTPS", "GRPC"]}, (validate_ext.custom_error) = "schema 必须是 FMT、HTTP、HTTPS 或 GRPC 之一"];
+  string url = 2 [(validate.rules).string = {min_len: 1, max_len: 255}, (validate_ext.custom_error) = "url 不能为空且长度不能超过 255 个字符"];
+  string path = 3 [(validate.rules).string = {min_len: 1, max_len: 255}, (validate_ext.custom_error) = "path 不能为空且长度不能超过 255 个字符"];
+  google.protobuf.Struct data = 4;
+
+  int64 delay_time = 7 [(validate.rules).int64 = {gte: 0, lte: 86400}, (validate_ext.custom_error) = "delay_time 必须在 0 到 86400 秒之间"];
+  int64 timeout = 8 [(validate.rules).int64 = {gte: 0, lte: 3600}, (validate_ext.custom_error) = "timeout 必须在 0 到 3600 秒之间"];
+  repeated int64 backoff = 9 [(validate.rules).repeated = {max_items: 20}, (validate_ext.custom_error) = "backoff 数组长度不能超过 20 个元素"];
+}
+
+message RegisterReply {
+  int64 task_no = 1;
+}
