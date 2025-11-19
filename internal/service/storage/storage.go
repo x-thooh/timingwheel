@@ -387,7 +387,7 @@ func (d *Storage) Execute(ctx context.Context, task *TaskEntity) (err error) {
 	}
 	task.Payload.Data["original"] = map[string]interface{}{"msg_no": task.TaskNo, "trace_id": trace.Get(ctx)}
 	resp, err = adapter.Request(rCtx, task.Payload)
-	if err == nil && resp == "SUCCESS" {
+	if err == nil && strings.Trim(resp, `"'`+"`") == "SUCCESS" {
 		return d.Success(ctx, task)
 	}
 	return d.Failure(ctx, task.WithFailMsg(&FailMsg{
@@ -455,9 +455,6 @@ func (d *Storage) Failure(ctx context.Context, task *TaskEntity) error {
 }
 
 func (d *Storage) Submit(ctx context.Context, task *TaskEntity, status int) error {
-	if task.FailCount >= len(*task.Backoff) {
-		return d.Failure(ctx, task)
-	}
 	now := time.Now()
 	if status > -1 {
 		lastRetryAt := &now
@@ -475,14 +472,14 @@ func (d *Storage) Submit(ctx context.Context, task *TaskEntity, status int) erro
 
 	}
 	delayTime := task.NextRunAt.Sub(now)
-	d.lg.Info(ctx, "Join TW", "task_no", fmt.Sprintf("%d-%d", task.TaskNo, task.FailCount), "delay_time", fmt.Sprintf("%d(%d)", func() int64 {
-		dd := int64(delayTime / time.Second)
-		tdd := d.GetDelayTime(task)
+	d.lg.Info(ctx, "Join TW", "task_no", fmt.Sprintf("%d-%d", task.TaskNo, task.FailCount), "delay_time_ms", fmt.Sprintf("%f(%f)", func() float64 {
+		dd := delayTime
+		tdd := time.Duration(d.GetDelayTime(task)) * time.Second
 		if dd < tdd {
 			dd = tdd
 		}
-		return dd
-	}(), delayTime/time.Second))
+		return dd.Seconds()
+	}(), delayTime.Seconds()))
 	if task.DelayTime != 0 {
 		if err := d.AfterFunc(ctx, delayTime, func() {
 			if err := d.Execute(ctx, task); err != nil {

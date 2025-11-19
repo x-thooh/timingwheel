@@ -10,9 +10,10 @@ grpc:
 
 logger:
   model: file                # file, std, file,std
-  level: debug               # debug, info, warn, error
+  level: info                # debug, info, warn, error
   format: text               # json or text
-  file: /app/logs/default.log         # 文件路径（自动创建）
+  file: /dev/stdout          # 文件路径（自动创建）
+#  file: /app/logs/default.log         # 文件路径（自动创建）
   max_size_mb: 50            # 单文件最大 MB
   max_backups: 5             # 保留多少历史文件
   max_age_days: 7            # 日志保留天数
@@ -32,7 +33,7 @@ database:
 
 timingwheel:
   # 间隔
-  tick: "1s"
+  tick: "1ms"
   # 轮数
   wheel_size: 60
   # 协程数量
@@ -56,7 +57,7 @@ timingwheel:
   timeout_interval: "10s"
 
   # 节点处理时间周期
-  node_interval: "10s"
+  node_interval: "60s"
 
   # 快速路径时间，需要大于【待处理提前加入时间轮时间】
   fast_path_time: "15s"

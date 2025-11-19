@@ -32,7 +32,7 @@ database:
 
 timingwheel:
   # 间隔
-  tick: "1s"
+  tick: "1ms"
   # 轮数
   wheel_size: 60
   # 协程数量
